@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { File, FileText, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState, useTransition } from "react"
@@ -62,7 +62,35 @@ export function DocumentList() {
         setDocuments(documents.filter((doc) => doc.id !== id))
 
         toast.success("Document deleted", {
-          description: "The document has been removed from the index.",
+          description: "The selected document has been successfully removed.",
+        })
+      } catch (error) {
+        console.error("Error deleting document:", error)
+        toast.error("Failed to delete document")
+      }
+    })
+  }
+
+  const handleDeleteAllFiles = async () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(
+          `${
+            process.env.NEXT_PUBLIC_BASE_URL ?? "http://127.0.0.1:8000"
+          }/remove-all-files`,
+          {
+            method: "DELETE",
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error("Failed to delete document")
+        }
+
+        setDocuments([])
+
+        toast.success("All documents deleted", {
+          description: "All documents have been successfully removed.",
         })
       } catch (error) {
         console.error("Error deleting document:", error)
@@ -92,33 +120,44 @@ export function DocumentList() {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {documents.map((doc) => ( 
-        <Card key={doc.id}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              {true ? (
-                <File className="h-5 w-5 text-red-500" />
-              ) : (
-                <FileText className="h-5 w-5 text-blue-500" />
-              )}
-              <span className="line-clamp-2">{doc.filename}</span>
-            </CardTitle>
-          </CardHeader>
-          <CardFooter className="mt-4">
-            <Button
-              variant="outline"
-              disabled={isDeleting}
-              size="sm"
-              onClick={() => handleDelete(doc.id)}
-              className="text-destructive"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
-            </Button>
-          </CardFooter>
-        </Card>
-      ))}
+    <div className="">
+      <div className="grid gap-4 md:grid-cols-2">
+        {documents.map((doc) => ( 
+          <Card key={doc.id} className="sm:max-h-[120px]">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                {doc.filename.endsWith(".pdf") ? (
+                  <File className="h-5 w-5 text-red-500" />
+                ) : (
+                  <FileText className="h-5 w-5 text-blue-500" />
+                )}
+                <span className="line-clamp-2">{doc.filename}</span>
+              </CardTitle>
+              <Button
+                variant="outline"
+                disabled={isDeleting}
+                size="sm"
+                onClick={() => handleDelete(doc.id)}
+                className="text-destructive mt-2"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
+
+      <div className="mt-8">
+        <Button
+          className="text-white bg-destructive dark:bg-red-600 hover:bg-destructive/90"
+          disabled={isDeleting}
+          onClick={handleDeleteAllFiles}
+        >
+          <Trash2 className="h-4 w-4 mr-2" /> 
+          Delete All Files
+        </Button>
+      </div>
     </div>
   )
 }
