@@ -52,10 +52,10 @@ export function FileUpload() {
       const formData = new FormData()
 
       for (const file of files) {
-        formData.append("file", file)
+        formData.append("files", file)
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? "http://127.0.0.1:5000"}/upload`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? "http://127.0.0.1:8000"}/upload`, {
         method: "POST",
         body: formData, 
       })
