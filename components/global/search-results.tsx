@@ -1,8 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
-import { File, FileText, Loader2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardContent,
@@ -10,16 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import type { JSX } from "react"
+import { File, FileText, Loader2 } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
 
 type SearchResult = {
   id: string
   filename: string
   snippet: string
-  score: number
-  fileType: "pdf" | "txt"
-  lastModified: string
+  score: number 
 }
 
 export function SearchResults() {
@@ -42,7 +39,13 @@ export function SearchResults() {
 
       try {
         const response = await fetch( 
-          `${process.env.NEXT_PUBLIC_BASE_URL ?? "http://127.0.0.1:5000"}/search?q=${encodeURIComponent(query)}`
+          `${process.env.NEXT_PUBLIC_BASE_URL ?? "http://127.0.0.1:8000"}/search?query=${encodeURIComponent(query)}`,
+          {
+            method: "POST",
+            headers: {
+              "accept": "application/json",
+            },
+          }
         ) 
         
         if (!response.ok) {
@@ -111,7 +114,7 @@ export function SearchResults() {
           <CardHeader className="pb-2">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2">
-                {result.fileType === "pdf" ? (
+                {result.filename.endsWith(".pdf") ? (
                   <File className="h-5 w-5 text-red-500" />
                 ) : (
                   <FileText className="h-5 w-5 text-blue-500" />
@@ -119,42 +122,18 @@ export function SearchResults() {
                 <CardTitle className="text-lg">{result.filename}</CardTitle>
               </div>
               <Badge variant="outline" className="text-xs">
-                Score: {result.score.toFixed(2)}
+                Score: {result.score.toFixed(3)}
               </Badge>
             </div>
             <CardDescription>Last modified: {formattedDate}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-sm">
-              <p className="line-clamp-3">
-                {highlightQuery(result.snippet, query)}
-              </p>
+              <p className="line-clamp-3" dangerouslySetInnerHTML={{ __html: result.snippet }}></p>
             </div>
           </CardContent>
         </Card>
       ))}
     </div>
-  )
-}
-
-// Helper function to highlight the query terms in the snippet
-function highlightQuery(text: string, query: string): JSX.Element {
-  const parts = text.split(new RegExp(`(${query})`, "gi"))
-
-  return (
-    <>
-      {parts.map((part, i) =>
-        part.toLowerCase() === query.toLowerCase() ? (
-          <mark
-            key={i}
-            className="bg-yellow-200 dark:bg-yellow-600 px-0.5 rounded"
-          >
-            {part}
-          </mark>
-        ) : (
-          part
-        )
-      )}
-    </>
   )
 }
