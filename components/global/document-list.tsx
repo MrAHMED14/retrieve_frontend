@@ -9,9 +9,7 @@ import { toast } from "sonner"
 
 type DocumentInfo = {
   id: string
-  name: string
-  fileType: "pdf" | "txt"
-  lastModified: string
+  filename: string
 }
 
 export function DocumentList() {
@@ -27,7 +25,7 @@ export function DocumentList() {
     try {
       setLoading(true)
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL ?? "http://127.0.0.1:5000"}/files`
+        `${process.env.NEXT_PUBLIC_BASE_URL ?? "http://127.0.0.1:8000"}/files`
       )
 
       if (!response.ok) {
@@ -50,8 +48,8 @@ export function DocumentList() {
       try {
         const response = await fetch(
           `${
-            process.env.NEXT_PUBLIC_BASE_URL ?? "http://127.0.0.1:5000"
-          }/file/${id}/delete`,
+            process.env.NEXT_PUBLIC_BASE_URL ?? "http://127.0.0.1:8000"
+          }/remove-file/${id}`,
           {
             method: "DELETE",
           }
@@ -95,16 +93,16 @@ export function DocumentList() {
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      {documents.map((doc) => (
+      {documents.map((doc) => ( 
         <Card key={doc.id}>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
-              {doc.fileType === "pdf" ? (
+              {true ? (
                 <File className="h-5 w-5 text-red-500" />
               ) : (
                 <FileText className="h-5 w-5 text-blue-500" />
               )}
-              <span className="line-clamp-2">{doc.name}</span>
+              <span className="line-clamp-2">{doc.filename}</span>
             </CardTitle>
           </CardHeader>
           <CardFooter className="mt-4">
